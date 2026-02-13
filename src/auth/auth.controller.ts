@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpUserDto } from './dto/sign-up-user.dto';
 import { SignUpCompanyDto } from './dto/sign-up-company.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { IsAuthGuard } from '../guards/is-auth.guard';
+import { GoogleOauthGuard } from '../guards/google.guard';
 import { UserId } from '../decorators/user-id.decorator';
 import {
   ApiBadRequestResponse,
@@ -37,6 +38,22 @@ export class AuthController {
   @ApiBadRequestResponse({ description: 'Invalid credentials' })
   signIn(@Body() dto: SignInDto) {
     return this.authService.signIn(dto);
+  }
+
+  @Get('google')
+  @UseGuards(GoogleOauthGuard)
+  signInWithGoogle() {
+    // Initiates Google OAuth flow
+  }
+
+  @Get('google/callback')
+  @UseGuards(GoogleOauthGuard)
+  async googleAuthCallback(@Req() req: any, @Res() res: any) {
+    const { token, redirectUrl } =
+      await this.authService.signInWithGoogle(req.user);
+
+    res.cookie('token', token, { maxAge: 60 * 60 * 24 * 7 * 1000 }); // 7 days
+    res.redirect(redirectUrl);
   }
 
   @Get('current-user')

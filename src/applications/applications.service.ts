@@ -125,5 +125,27 @@ export class ApplicationsService {
       .sort({ createdAt: -1 })
       .lean();
   }
+
+  async getAllForAdmin(companyId?: string) {
+    const filter: any = {};
+    if (companyId) {
+      const vacancies = await this.vacancyModel
+        .find({ companyId })
+        .select('_id')
+        .lean();
+      const vacancyIds = vacancies.map((v) => v._id as Types.ObjectId);
+      filter.vacancyId = { $in: vacancyIds };
+    }
+
+    return this.applicationModel
+      .find(filter)
+      .populate('userId', 'fullName email')
+      .populate({
+        path: 'vacancyId',
+        populate: { path: 'companyId', select: 'name email' },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+  }
 }
 

@@ -39,9 +39,7 @@ export class VacanciesService {
     }
     const company = await this.companyModel.findById(user.companyId);
     if (!company) throw new NotFoundException('Company not found');
-    if (!company.isApproved) {
-      throw new ForbiddenException('Company is not approved');
-    }
+    // Company approval check is handled by middleware
     return company;
   }
 
@@ -69,11 +67,15 @@ export class VacanciesService {
     const query: any = { status: VacancyStatus.APPROVED };
 
     if (search) {
-      const regex = new RegExp(search, 'i');
+      const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
       query.$or = [{ title: regex }, { description: regex }];
     }
-    if (category) query.category = category;
-    if (location) query.location = location;
+    if (category) {
+      query.category = new RegExp(`^${category.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+    }
+    if (location) {
+      query.location = new RegExp(`^${location.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
+    }
 
     if (salaryMin !== undefined || salaryMax !== undefined) {
       query.$and = [];
@@ -151,6 +153,15 @@ export class VacanciesService {
       .find({ status: VacancyStatus.PENDING })
       .populate('companyId')
       .lean();
+  }
+
+  async findOneForAdmin(id: string) {
+    const vacancy = await this.vacancyModel
+      .findById(id)
+      .populate('companyId')
+      .lean();
+    if (!vacancy) throw new NotFoundException('Vacancy not found');
+    return vacancy;
   }
 
   async approve(id: string) {

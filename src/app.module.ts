@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -10,11 +11,17 @@ import { AwsS3Module } from './aws-s3/aws-s3.module';
 import { EmailSenderModule } from './email-sender/email-sender.module';
 import { VacanciesModule } from './vacancies/vacancies.module';
 import { ApplicationsModule } from './applications/applications.module';
+import { JwtParseMiddleware } from './middlewares/jwt-parse.middleware';
+import { RequestIdMiddleware } from './middlewares/request-id.middleware';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGO_URL!),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET ?? 'secret',
+    }),
     AuthModule,
     UsersModule,
     CompaniesModule,
@@ -26,4 +33,10 @@ import { ApplicationsModule } from './applications/applications.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware).forRoutes('*');
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(JwtParseMiddleware).forRoutes('*');
+  }
+}

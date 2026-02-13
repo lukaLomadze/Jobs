@@ -94,6 +94,14 @@ export class VacanciesController {
     return this.vacanciesService.reject(id);
   }
 
+  @Get('admin/:id')
+  @UseGuards(IsAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  getOneForAdmin(@Param() { id }: IsValidObjectId) {
+    return this.vacanciesService.findOneForAdmin(id);
+  }
+
   // Company-specific
   @Get('my')
   @UseGuards(IsAuthGuard, RolesGuard)

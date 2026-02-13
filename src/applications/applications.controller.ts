@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -20,6 +21,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -70,6 +72,15 @@ export class ApplicationsController {
   @ApiBearerAuth()
   getCompanyApplications(@UserId() userId: string) {
     return this.applicationsService.getCompanyApplications(userId);
+  }
+
+  @Get('admin')
+  @UseGuards(IsAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'companyId', required: false })
+  getAllForAdmin(@Query('companyId') companyId?: string) {
+    return this.applicationsService.getAllForAdmin(companyId);
   }
 
   @Get('vacancy/:id')

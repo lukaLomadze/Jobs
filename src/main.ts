@@ -8,6 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(morgan('tiny'));
+  // Logger with requestId is applied in AppModule (LoggerMiddleware)
 
   app.enableCors({
     origin: process.env.FRONT_URL ?? 'http://localhost:3000',
@@ -33,6 +34,6 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3006);
+  await app.listen(process.env.PORT ?? 3001);
 }
 bootstrap();

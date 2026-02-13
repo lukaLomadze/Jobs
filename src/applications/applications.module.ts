@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ApplicationsController } from './applications.controller';
 import { ApplicationsService } from './applications.service';
@@ -9,6 +14,8 @@ import { userSchema } from '../users/schema/user.schema';
 import { AwsS3Module } from '../aws-s3/aws-s3.module';
 import { EmailSenderModule } from '../email-sender/email-sender.module';
 import { RolesGuard } from '../guards/roles.guard';
+import { UserOnlyMiddleware } from '../middlewares/user-only.middleware';
+import { CompanyRoleMiddleware } from '../middlewares/company-role.middleware';
 
 @Module({
   imports: [
@@ -24,5 +31,16 @@ import { RolesGuard } from '../guards/roles.guard';
   controllers: [ApplicationsController],
   providers: [ApplicationsService, RolesGuard],
 })
-export class ApplicationsModule {}
+export class ApplicationsModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(UserOnlyMiddleware).forRoutes(
+      { path: 'applications', method: RequestMethod.POST },
+      { path: 'applications/my', method: RequestMethod.GET },
+    );
+    consumer.apply(CompanyRoleMiddleware).forRoutes(
+      { path: 'applications/company', method: RequestMethod.GET },
+      { path: 'applications/vacancy/:id', method: RequestMethod.GET },
+    );
+  }
+}
 

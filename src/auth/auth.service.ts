@@ -85,4 +85,33 @@ export class AuthService {
     const { password, ...rest } = user as any;
     return rest;
   }
+
+  async signInWithGoogle(googleUser: {
+    fullName: string;
+    email: string;
+    profilePic?: string;
+  }) {
+    let user = await this.userModel.findOne({ email: googleUser.email });
+
+    if (!user) {
+      // Create new user with Google OAuth
+      user = await this.userModel.create({
+        fullName: googleUser.fullName,
+        email: googleUser.email,
+        password: '', // No password for OAuth users
+        role: Role.USER,
+      });
+    }
+
+    // Update profile pic if provided
+    if (googleUser.profilePic) {
+      // You might want to store this in user schema if you have a profilePic field
+    }
+
+    const payload = { userId: user._id.toString(), role: user.role };
+    const token = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const redirectUrl = process.env.FRONT_URL ?? 'http://localhost:3000';
+
+    return { token, redirectUrl };
+  }
 }
