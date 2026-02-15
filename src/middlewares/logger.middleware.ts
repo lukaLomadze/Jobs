@@ -1,9 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 
-/**
- * Logs each request with timestamp, method, url, and requestId (if set).
- */
+
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
@@ -15,7 +13,6 @@ export class LoggerMiddleware implements NestMiddleware {
   }
 }
 
-/** Standalone function for use in main.ts (runs before Nest middlewares). */
 export function loggerMiddleware(
   req: Request,
   res: Response,

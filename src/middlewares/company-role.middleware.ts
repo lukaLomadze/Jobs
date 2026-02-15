@@ -6,10 +6,7 @@ import {
 import { NextFunction, Request, Response } from 'express';
 import { Role } from '../enum/role.enum';
 
-/**
- * Ensures the authenticated user has company role.
- * Must run after JwtParseMiddleware.
- */
+
 @Injectable()
 export class CompanyRoleMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {

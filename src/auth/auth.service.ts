@@ -94,8 +94,7 @@ export class AuthService {
     let user = await this.userModel.findOne({ email: googleUser.email });
 
     if (!user) {
-      // Create new user with Google OAuth
-      // Generate a random password hash for OAuth users (they can only sign in via Google)
+     
       const randomPassword = Math.random().toString(36).slice(-20) + Date.now().toString();
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
       user = await this.userModel.create({
@@ -106,10 +105,7 @@ export class AuthService {
       });
     }
 
-    // Update profile pic if provided
-    if (googleUser.profilePic) {
-      // You might want to store this in user schema if you have a profilePic field
-    }
+   
 
     const payload = { userId: user._id.toString(), role: user.role };
     const token = this.jwtService.sign(payload, { expiresIn: '7d' });

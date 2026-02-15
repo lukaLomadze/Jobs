@@ -19,7 +19,7 @@ export class JwtParseMiddleware implements NestMiddleware {
         req['userId'] = payload.userId;
         req['role'] = payload.role;
       } catch {
-        // Invalid or expired token – leave userId/role undefined
+        
       }
     }
     next();
