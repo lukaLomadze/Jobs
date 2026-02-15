@@ -67,6 +67,7 @@ export class ApplicationsService {
     const company = vacancy.companyId as unknown as Company;
     const frontendUrl = process.env.FRONT_URL ?? 'http://localhost:3000';
     try {
+     
       await this.emailSenderService.sendApplicationNotification(
         company.email,
         user.fullName,

@@ -10,7 +10,7 @@ export class EmailSenderService {
   async sendEmail(to: string, subject: string, text: string) {
     await this.emailService.sendMail({
       to,
-      from: process.env.EMAIL_FROM ?? 'Jobs Board <noreply@jobsboard.com>',
+      from: process.env.EMAIL_USER ?? 'Jobs Board <noreply@jobsboard.com>',
       subject,
       text,
     });
@@ -22,11 +22,12 @@ export class EmailSenderService {
     vacancyTitle: string,
     siteUrl: string,
   ) {
+    
     const html = `New application from ${applicantName} for vacancy "${vacancyTitle}". Visit ${siteUrl} to view details.`;
 
     await this.emailService.sendMail({
       to,
-      from: process.env.EMAIL_FROM ?? 'Jobs Board <noreply@jobsboard.com>',
+      from: process.env.EMAIL_USER ?? 'Jobs Board <noreply@jobsboard.com>',
       subject: `New application: ${vacancyTitle}`,
       html,
     });

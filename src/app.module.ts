@@ -14,6 +14,7 @@ import { ApplicationsModule } from './applications/applications.module';
 import { JwtParseMiddleware } from './middlewares/jwt-parse.middleware';
 import { RequestIdMiddleware } from './middlewares/request-id.middleware';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -21,6 +22,16 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
     MongooseModule.forRoot(process.env.MONGO_URL!),
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'secret',
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST,
+        port: 465,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      },
     }),
     AuthModule,
     UsersModule,
