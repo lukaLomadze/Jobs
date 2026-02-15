@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(morgan('tiny'));
-  // Logger with requestId is applied in AppModule (LoggerMiddleware)
+  
 
   app.enableCors({
     origin: process.env.FRONT_URL ?? 'http://localhost:3000',
@@ -16,11 +16,12 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Jobs Board API')
-    .setDescription(
-      'Job board API - vacancies, companies, applications. Auth: JWT Bearer.',
-    )
     .setVersion('1.0.0')
     .addBearerAuth()
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('vacancies', 'Vacancy management')
+    .addTag('companies', 'Company management')
+    .addTag('applications', 'Job application management')
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

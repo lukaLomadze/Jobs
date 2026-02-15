@@ -11,42 +11,53 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('sign-up/user')
-  @ApiCreatedResponse({ description: 'User registered' })
-  @ApiBadRequestResponse({ description: 'User already exists' })
+  @ApiOperation({ summary: 'Register a new user', 
+    description: 'Creates a new user account with job seeker role' })
+  @ApiCreatedResponse({ description: 'User registered successfully', type: SignUpUserDto })
+  @ApiBadRequestResponse({ description: 'User already exists or validation failed' })
   signUpUser(@Body() dto: SignUpUserDto) {
     return this.authService.signUpUser(dto);
   }
 
   @Post('sign-up/company')
-  @ApiCreatedResponse({ description: 'Company registered, awaiting approval' })
-  @ApiBadRequestResponse({ description: 'Email already registered' })
+  @ApiOperation({ summary: 'Register a new company', description: 'Creates a new company account. Company requires admin approval before becoming active.' })
+  @ApiCreatedResponse({ description: 'Company registered, awaiting approval', type: SignUpCompanyDto })
+  @ApiBadRequestResponse({ description: 'Email already registered or validation failed' })
   signUpCompany(@Body() dto: SignUpCompanyDto) {
     return this.authService.signUpCompany(dto);
   }
 
   @Post('sign-in')
-  @ApiOkResponse({ description: 'Returns token and role' })
+  @ApiOperation({ summary: 'User login',
+     description: 'Authenticates user and returns JWT token with role information' })
+  @ApiOkResponse({ description: 'Returns token and role', type: SignInDto })
   @ApiBadRequestResponse({ description: 'Invalid credentials' })
   signIn(@Body() dto: SignInDto) {
     return this.authService.signIn(dto);
   }
 
   @Get('google')
+  @ApiOperation({ summary: 'Google OAuth login',
+     description: 'Initiates Google OAuth 2.0 authentication flow' })
   @UseGuards(GoogleOauthGuard)
   signInWithGoogle() {
-    // Initiates Google OAuth flow
+    
+    
   }
 
   @Get('google/callback')
+  @ApiOperation({ summary: 'Google OAuth callback',
+     description: 'Handles OAuth callback from Google and returns authentication token' })
   @UseGuards(GoogleOauthGuard)
   async googleAuthCallback(@Req() req: any, @Res() res: any) {
     const { token, redirectUrl } =
@@ -59,6 +70,8 @@ export class AuthController {
   @Get('current-user')
   @UseGuards(IsAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user info', 
+    description: 'Returns the current authenticated user information' })
   @ApiOkResponse({ description: 'Current user info' })
   currentUser(@UserId() userId: string) {
     return this.authService.getCurrentUser(userId);

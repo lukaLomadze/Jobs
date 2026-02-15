@@ -21,6 +21,8 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -29,7 +31,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @ApiTags('applications')
 @Controller('applications')
 export class ApplicationsController {
-  constructor(private readonly applicationsService: ApplicationsService) {}
+  constructor(private readonly applicationsService: ApplicationsService) { }
 
   @Post()
   @UseGuards(IsAuthGuard, RolesGuard)
@@ -37,14 +39,19 @@ export class ApplicationsController {
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('cv'))
   @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Apply for a vacancy',
+     description: 'Submits a job application with CV upload. User only.' })
   @ApiBody({
+    description: 'Application data with CV file',
     schema: {
       type: 'object',
       properties: {
-        vacancyId: { type: 'string' },
+        vacancyId: { type: 'string',
+           description: 'ID of the vacancy to apply for' },
         cv: {
           type: 'string',
           format: 'binary',
+          description: 'CV file (PDF, DOC, DOCX)',
         },
       },
       required: ['vacancyId', 'cv'],
@@ -62,6 +69,8 @@ export class ApplicationsController {
   @UseGuards(IsAuthGuard, RolesGuard)
   @Roles(Role.USER)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get my applications',
+    description: 'Returns all job applications submitted by the authenticated user' })
   getMyApplications(@UserId() userId: string) {
     return this.applicationsService.getUserApplications(userId);
   }
@@ -70,6 +79,8 @@ export class ApplicationsController {
   @UseGuards(IsAuthGuard, RolesGuard)
   @Roles(Role.COMPANY)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get company applications',
+     description: 'Returns all applications for jobs posted by the authenticated company' })
   getCompanyApplications(@UserId() userId: string) {
     return this.applicationsService.getCompanyApplications(userId);
   }
@@ -78,7 +89,10 @@ export class ApplicationsController {
   @UseGuards(IsAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
-  @ApiQuery({ name: 'companyId', required: false })
+  @ApiOperation({ summary: 'Get all applications (Admin)',
+     description: 'Returns all applications. Admin only. Optionally filter by company.' })
+  @ApiQuery({ name: 'companyId', required: false, 
+    description: 'Filter by company ID' })
   getAllForAdmin(@Query('companyId') companyId?: string) {
     return this.applicationsService.getAllForAdmin(companyId);
   }
@@ -87,6 +101,9 @@ export class ApplicationsController {
   @UseGuards(IsAuthGuard, RolesGuard)
   @Roles(Role.COMPANY)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get applications for a vacancy', 
+    description: 'Returns all applications for a specific vacancy. Company only (owner).' })
+  @ApiParam({ name: 'id', description: 'Vacancy ID', type: String })
   getForVacancy(
     @UserId() userId: string,
     @Param() { id }: IsValidObjectId,
