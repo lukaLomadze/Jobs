@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -16,6 +17,8 @@ import { Role } from '../enum/role.enum';
 
 @Injectable()
 export class ApplicationsService {
+  private readonly logger = new Logger(ApplicationsService.name);
+
   constructor(
     @InjectModel('application') private applicationModel: Model<Application>,
     @InjectModel('vacancy') private vacancyModel: Model<Vacancy>,
@@ -63,12 +66,18 @@ export class ApplicationsService {
 
     const company = vacancy.companyId as unknown as Company;
     const frontendUrl = process.env.FRONT_URL ?? 'http://localhost:3000';
-    await this.emailSenderService.sendApplicationNotification(
-      company.email,
-      user.fullName,
-      vacancy.title,
-      frontendUrl,
-    );
+    try {
+      await this.emailSenderService.sendApplicationNotification(
+        company.email,
+        user.fullName,
+        vacancy.title,
+        frontendUrl,
+      );
+    } catch (err) {
+      this.logger.warn(
+        `Failed to send application notification email to ${company.email}: ${err instanceof Error ? err.message : err}`,
+      );
+    }
 
     return application;
   }

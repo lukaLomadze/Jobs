@@ -95,10 +95,13 @@ export class AuthService {
 
     if (!user) {
       // Create new user with Google OAuth
+      // Generate a random password hash for OAuth users (they can only sign in via Google)
+      const randomPassword = Math.random().toString(36).slice(-20) + Date.now().toString();
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
       user = await this.userModel.create({
         fullName: googleUser.fullName,
         email: googleUser.email,
-        password: '', // No password for OAuth users
+        password: hashedPassword,
         role: Role.USER,
       });
     }

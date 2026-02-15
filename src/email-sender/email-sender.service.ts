@@ -1,8 +1,10 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class EmailSenderService {
+  private readonly logger = new Logger(EmailSenderService.name);
+
   constructor(private emailService: MailerService) {}
 
   async sendEmail(to: string, subject: string, text: string) {
@@ -28,6 +30,7 @@ export class EmailSenderService {
       subject: `New application: ${vacancyTitle}`,
       html,
     });
+    this.logger.log(`Application notification email sent to ${to}`);
   }
 }
 

@@ -7,11 +7,15 @@ import { EmailSenderService } from './email-sender.service';
     MailerModule.forRoot({
       transport: {
         host: process.env.EMAIL_HOST,
-        port: 465,
+        port: parseInt(process.env.EMAIL_PORT ?? '465', 10),
+        secure: true,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
+      },
+      defaults: {
+        from: process.env.EMAIL_FROM ?? 'Jobs Board <noreply@jobsboard.com>',
       },
     }),
   ],
