@@ -85,12 +85,11 @@ export class ApplicationsService {
 
   async getUserApplications(userId: string) {
     return this.applicationModel
-      .find({ userId })
+      .find({ userId: new Types.ObjectId(userId) })
       .populate({
         path: 'vacancyId',
         populate: { path: 'companyId' },
       })
-      .sort({ createdAt: -1 })
       .lean();
   }
 
@@ -129,7 +128,7 @@ export class ApplicationsService {
     }
 
     return this.applicationModel
-      .find({ vacancyId })
+      .find({ vacancyId : new Types.ObjectId(vacancyId) })
       .populate('userId', 'fullName email')
       .populate('vacancyId')
       .sort({ createdAt: -1 })
