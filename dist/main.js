@@ -12,7 +12,7 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.use((0, morgan_1.default)('tiny'));
     app.enableCors({
-        origin: process.env.FRONT_URL ?? 'http://localhost:3000',
+        origin: [process.env.FRONT_URL, 'http://localhost:3000'],
     });
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Jobs Board API')
