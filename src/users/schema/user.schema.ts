@@ -2,6 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Role } from '../../enum/role.enum';
 
+
+
+
 @Schema({
   timestamps: true,
 })
